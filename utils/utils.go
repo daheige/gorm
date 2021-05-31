@@ -3,6 +3,8 @@ package utils
 import (
 	"database/sql/driver"
 	"fmt"
+	"log"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -14,17 +16,23 @@ var gormSourceDir string
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	gormSourceDir = strings.Replace(file, `utils.utils.go`, "", -1)
+	// Here is the directory to get the gorm source code. Here, the filepath.Dir mode is enough,
+	// and the filepath is compatible with various operating systems
+	gormSourceDir = filepath.Dir(filepath.Dir(file))
+	log.Println("gormSourceDir: ", gormSourceDir)
 }
 
 func FileWithLineNum() string {
-	for i := 2; i < 15; i++ {
+	// This function is to get the line number corresponding to the file, where i starts from 1, not 2
+	for i := 1; i < 15; i++ {
 		_, file, line, ok := runtime.Caller(i)
 
+		log.Println("file:", file, " line: ", line, "ok: ", ok)
 		if ok && (!strings.HasPrefix(file, gormSourceDir) || strings.HasSuffix(file, "_test.go")) {
 			return file + ":" + strconv.FormatInt(int64(line), 10)
 		}
 	}
+
 	return ""
 }
 
